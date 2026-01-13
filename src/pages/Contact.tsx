@@ -1,10 +1,18 @@
-import { useState } from "react";
-import { Send, Phone, Mail, MapPin } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Send, Phone, Mail, MapPin, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
+import { supabase } from "@/integrations/supabase/client";
+
+// Generate simple math captcha
+const generateCaptcha = () => {
+  const num1 = Math.floor(Math.random() * 10) + 1;
+  const num2 = Math.floor(Math.random() * 10) + 1;
+  return { num1, num2, answer: num1 + num2 };
+};
 
 const Contact = () => {
   const { toast } = useToast();
@@ -15,11 +23,18 @@ const Contact = () => {
     email: "",
     message: "",
   });
+  const [captcha, setCaptcha] = useState(generateCaptcha);
+  const [captchaInput, setCaptchaInput] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const refreshCaptcha = () => {
+    setCaptcha(generateCaptcha());
+    setCaptchaInput("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,17 +49,47 @@ const Contact = () => {
       return;
     }
 
+    // Validate captcha
+    if (parseInt(captchaInput) !== captcha.answer) {
+      toast({
+        title: "Ошибка",
+        description: "Неверный ответ на проверочный вопрос",
+        variant: "destructive",
+      });
+      refreshCaptcha();
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // For now, just show success - Telegram integration will be added with backend
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-telegram', {
+        body: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email || undefined,
+          message: formData.message || undefined,
+        },
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Заявка отправлена!",
         description: "Мы свяжемся с вами в ближайшее время",
       });
       setFormData({ name: "", phone: "", email: "", message: "" });
+      refreshCaptcha();
+    } catch (error) {
+      console.error('Error sending form:', error);
+      toast({
+        title: "Ошибка отправки",
+        description: "Попробуйте ещё раз позже",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -122,6 +167,35 @@ const Contact = () => {
                     className="bg-secondary border-border focus:border-gold resize-none"
                   />
                 </div>
+                
+                {/* Simple Math Captcha */}
+                <div className="p-4 bg-secondary/50 rounded-sm border border-border">
+                  <label className="block text-sm uppercase tracking-widest mb-3">
+                    Проверка *
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-serif">
+                      {captcha.num1} + {captcha.num2} = 
+                    </span>
+                    <Input
+                      type="number"
+                      value={captchaInput}
+                      onChange={(e) => setCaptchaInput(e.target.value)}
+                      placeholder="?"
+                      className="w-20 h-10 bg-background border-border focus:border-gold text-center"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={refreshCaptcha}
+                      className="text-muted-foreground hover:text-gold"
+                    >
+                      <RefreshCw size={18} />
+                    </Button>
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
                   variant="gold"
