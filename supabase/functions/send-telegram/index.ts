@@ -10,6 +10,9 @@ interface ContactRequest {
   phone: string;
   email?: string;
   message?: string;
+  productName?: string;
+  volume?: number;
+  price?: number;
 }
 
 serve(async (req) => {
@@ -19,7 +22,7 @@ serve(async (req) => {
   }
 
   try {
-    const { name, phone, email, message }: ContactRequest = await req.json();
+    const { name, phone, email, message, productName, volume, price }: ContactRequest = await req.json();
 
     const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
@@ -30,16 +33,38 @@ serve(async (req) => {
     }
 
     // Format message for Telegram
-    const telegramMessage = `
+    let telegramMessage = `
 🌸 *Новая заявка с сайта AromaNote*
 
 👤 *Имя:* ${name}
 📞 *Телефон:* ${phone}
-${email ? `📧 *Email:* ${email}` : ''}
-${message ? `💬 *Сообщение:* ${message}` : ''}
+${email ? `📧 *Email:* ${email}` : ''}`;
 
-📅 _${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}_
-    `.trim();
+    // Add order details if present
+    if (productName) {
+      telegramMessage += `
+
+🛍️ *Заказ:*
+   • Аромат: ${productName}`;
+      if (volume) {
+        telegramMessage += `
+   • Объём: ${volume} мл`;
+      }
+      if (price) {
+        telegramMessage += `
+   • Цена: ${price.toLocaleString('ru-RU')} ₽`;
+      }
+    }
+
+    if (message) {
+      telegramMessage += `
+
+💬 *Сообщение:* ${message}`;
+    }
+
+    telegramMessage += `
+
+📅 _${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}_`;
 
     console.log('Sending message to Telegram...');
 
@@ -52,7 +77,7 @@ ${message ? `💬 *Сообщение:* ${message}` : ''}
         },
         body: JSON.stringify({
           chat_id: chatId,
-          text: telegramMessage,
+          text: telegramMessage.trim(),
           parse_mode: 'Markdown',
         }),
       }

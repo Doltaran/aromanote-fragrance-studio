@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Send, Phone, Mail, MapPin, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,16 @@ const generateCaptcha = () => {
   return { num1, num2, answer: num1 + num2 };
 };
 
+interface OrderData {
+  productName: string;
+  volume: number;
+  price: number;
+}
+
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -25,6 +32,18 @@ const Contact = () => {
   });
   const [captcha, setCaptcha] = useState(generateCaptcha);
   const [captchaInput, setCaptchaInput] = useState("");
+
+  // Load order data from session storage
+  useEffect(() => {
+    const savedOrder = sessionStorage.getItem("orderData");
+    if (savedOrder) {
+      try {
+        setOrderData(JSON.parse(savedOrder));
+      } catch (e) {
+        console.error("Error parsing order data:", e);
+      }
+    }
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -35,6 +54,11 @@ const Contact = () => {
   const refreshCaptcha = () => {
     setCaptcha(generateCaptcha());
     setCaptchaInput("");
+  };
+
+  const clearOrder = () => {
+    sessionStorage.removeItem("orderData");
+    setOrderData(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +93,10 @@ const Contact = () => {
           phone: formData.phone,
           email: formData.email || undefined,
           message: formData.message || undefined,
+          // Order details
+          productName: orderData?.productName,
+          volume: orderData?.volume,
+          price: orderData?.price,
         },
       });
 
@@ -79,6 +107,7 @@ const Contact = () => {
         description: "Мы свяжемся с вами в ближайшее время",
       });
       setFormData({ name: "", phone: "", email: "", message: "" });
+      clearOrder();
       refreshCaptcha();
     } catch (error) {
       console.error('Error sending form:', error);
@@ -115,6 +144,39 @@ const Contact = () => {
             {/* Form */}
             <div className="animate-fade-up">
               <h2 className="font-serif text-3xl mb-8">Оставить заявку</h2>
+
+              {/* Order Summary */}
+              {orderData && (
+                <div className="mb-8 p-6 bg-gold/10 border border-gold/30 rounded-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-serif text-xl text-gold">Ваш заказ</h3>
+                    <button
+                      type="button"
+                      onClick={clearOrder}
+                      className="text-sm text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <span className="text-muted-foreground">Аромат:</span>{" "}
+                      <span className="font-medium">{orderData.productName}</span>
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Объём:</span>{" "}
+                      <span className="font-medium">{orderData.volume} мл</span>
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Цена:</span>{" "}
+                      <span className="font-medium font-serif text-lg text-gold">
+                        {orderData.price.toLocaleString("ru-RU")} ₽
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm uppercase tracking-widest mb-2">

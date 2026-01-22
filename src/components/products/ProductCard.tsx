@@ -6,8 +6,8 @@ interface ProductCardProps {
   name: string;
   category: string;
   price: number;
-  image: string;
-  notes?: string;
+  image: string | null;
+  notes?: string | null;
 }
 
 const ProductCard = ({ id, name, category, price, image, notes }: ProductCardProps) => {
@@ -15,11 +15,17 @@ const ProductCard = ({ id, name, category, price, image, notes }: ProductCardPro
     <div className="group relative bg-card rounded-sm overflow-hidden shadow-soft hover:shadow-card transition-all duration-500">
       {/* Image */}
       <div className="aspect-[3/4] overflow-hidden bg-secondary">
-        <img
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            Нет изображения
+          </div>
+        )}
       </div>
 
       {/* Content */}
