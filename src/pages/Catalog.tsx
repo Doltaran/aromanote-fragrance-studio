@@ -78,7 +78,7 @@ const Catalog = () => {
                   id={product.id}
                   name={product.name}
                   category={product.category}
-                  price={product.volumes[0]?.price || product.base_price}
+                  price={product.volumes[product.volumes.length - 1]?.price || product.base_price}
                   image={product.image_url}
                   notes={product.short_description}
                 />
