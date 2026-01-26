@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Send, Phone, Mail, MapPin, RefreshCw } from "lucide-react";
+import { Send, Phone, Mail, MapPin, RefreshCw, ShoppingBag, MessageSquare, ClipboardList, PhoneCall } from "lucide-react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +23,7 @@ interface OrderData {
 
 const Contact = () => {
   const { toast } = useToast();
+  const { getContent, loading: contentLoading } = useSiteContent();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [formData, setFormData] = useState({
@@ -127,12 +129,13 @@ const Contact = () => {
       <section className="py-24 bg-secondary">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gold uppercase tracking-[0.3em] text-sm mb-4">
-            Свяжитесь с нами
+            {getContent("contact_hero_subtitle", "Свяжитесь с нами")}
           </p>
-          <h1 className="font-serif text-5xl md:text-6xl mb-6">Контакты</h1>
+          <h1 className="font-serif text-5xl md:text-6xl mb-6">
+            {getContent("contact_hero_title", "Контакты")}
+          </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Оставьте заявку, и наши консультанты помогут подобрать 
-            идеальный аромат специально для вас.
+            {getContent("contact_hero_description", "Оставьте заявку, и наши консультанты помогут подобрать идеальный аромат специально для вас.")}
           </p>
         </div>
       </section>
@@ -276,8 +279,36 @@ const Contact = () => {
               </form>
             </div>
 
-            {/* Contact Info */}
+            {/* How to Order & Contact Info */}
             <div className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              {/* How to Order */}
+              <div className="mb-12">
+                <h2 className="font-serif text-3xl mb-8">Как заказать</h2>
+                <div className="space-y-6">
+                  {[
+                    { icon: ShoppingBag, step: 1, key: "order_step_1", fallback: "Выберите аромат в каталоге и нужный объём" },
+                    { icon: ClipboardList, step: 2, key: "order_step_2", fallback: "Нажмите \"Заказать\" на странице товара" },
+                    { icon: MessageSquare, step: 3, key: "order_step_3", fallback: "Заполните форму обратной связи" },
+                    { icon: PhoneCall, step: 4, key: "order_step_4", fallback: "Дождитесь звонка от нашего менеджера" },
+                  ].map(({ icon: Icon, step, key, fallback }) => (
+                    <div key={step} className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 relative">
+                        <Icon className="text-gold" size={20} />
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-gold text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                          {step}
+                        </span>
+                      </div>
+                      <div className="pt-3">
+                        <p className="text-foreground">
+                          {getContent(key, fallback)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact Info */}
               <h2 className="font-serif text-3xl mb-8">Контактная информация</h2>
               <div className="space-y-8">
                 <div className="flex items-start gap-4">
@@ -286,8 +317,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-serif text-xl mb-1">Телефон</h3>
-                    <p className="text-muted-foreground">+7 (999) 123-45-67</p>
-                    <p className="text-muted-foreground">Пн-Сб: 10:00 - 20:00</p>
+                    <p className="text-muted-foreground">{getContent("contact_phone", "+7 (999) 123-45-67")}</p>
+                    <p className="text-muted-foreground">{getContent("contact_hours", "Пн-Сб: 10:00 - 20:00")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -296,7 +327,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-serif text-xl mb-1">Email</h3>
-                    <p className="text-muted-foreground">info@aromanote.ru</p>
+                    <p className="text-muted-foreground">{getContent("contact_email", "info@aromanote.ru")}</p>
                     <p className="text-muted-foreground">Ответим в течение 24 часов</p>
                   </div>
                 </div>
@@ -306,15 +337,9 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-serif text-xl mb-1">Адрес</h3>
-                    <p className="text-muted-foreground">г. Москва</p>
-                    <p className="text-muted-foreground">ул. Парфюмерная, д. 1</p>
+                    <p className="text-muted-foreground">{getContent("contact_address", "г. Москва, ул. Парфюмерная, д. 1")}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Map Placeholder */}
-              <div className="mt-12 aspect-video bg-secondary rounded-sm flex items-center justify-center border border-border">
-                <p className="text-muted-foreground">Карта</p>
               </div>
             </div>
           </div>
