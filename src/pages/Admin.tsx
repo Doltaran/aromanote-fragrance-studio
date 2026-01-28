@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Plus, Edit, Trash2, LogOut, Package, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, LogOut, Package, FileText, Star } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,7 @@ import {
 import Layout from "@/components/layout/Layout";
 import ProductForm from "@/components/admin/ProductForm";
 import ContentEditor from "@/components/admin/ContentEditor";
+import FeaturedProductsEditor from "@/components/admin/FeaturedProductsEditor";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useProducts";
 import type { Product } from "@/types/product";
@@ -120,9 +121,13 @@ const Admin = () => {
                 <Package size={16} />
                 Товары
               </TabsTrigger>
+              <TabsTrigger value="featured" className="gap-2">
+                <Star size={16} />
+                Популярные
+              </TabsTrigger>
               <TabsTrigger value="content" className="gap-2">
                 <FileText size={16} />
-                Контент сайта
+                Контент
               </TabsTrigger>
             </TabsList>
 
@@ -202,6 +207,17 @@ const Admin = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Featured Products Tab */}
+            <TabsContent value="featured">
+              <div className="mb-8">
+                <h2 className="font-serif text-2xl mb-2">Популярные ароматы</h2>
+                <p className="text-muted-foreground">
+                  Управление товарами, отображаемыми на главной странице
+                </p>
+              </div>
+              <FeaturedProductsEditor />
             </TabsContent>
 
             {/* Content Tab */}

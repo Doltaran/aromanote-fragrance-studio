@@ -49,9 +49,9 @@ const Footer = () => {
           <div>
             <h4 className="font-serif text-xl mb-6">Контакты</h4>
             <ul className="space-y-3 text-cream/70">
-              <li>+7 (999) 123-45-67</li>
+              <li>+7 (932) 427 7778</li>
               <li>info@aromanote.ru</li>
-              <li>Москва, ул. Парфюмерная, 1</li>
+              <li>Россия, г. Когалым</li>
             </ul>
           </div>
         </div>
