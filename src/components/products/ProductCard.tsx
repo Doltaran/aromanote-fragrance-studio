@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, category, price, image, notes }: ProductCardProps) => {
   return (
-    <div className="group relative bg-card rounded-sm overflow-hidden shadow-soft hover:shadow-card transition-all duration-500">
+    <div className="group relative bg-card rounded-sm overflow-hidden shadow-soft hover:shadow-card hover-lift transition-all duration-500">
       {/* Image */}
       <div className="aspect-[3/4] overflow-hidden bg-secondary">
         {image ? (

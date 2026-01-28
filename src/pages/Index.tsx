@@ -3,11 +3,11 @@ import { ArrowRight, Sparkles, Heart, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import ProductCard from "@/components/products/ProductCard";
-import { products } from "@/data/products";
+import { useFeaturedProducts } from "@/hooks/useFeaturedProducts";
 import heroImage from "@/assets/hero-perfume.jpg";
 
 const Index = () => {
-  const featuredProducts = products.slice(0, 4);
+  const { featuredProducts, loading } = useFeaturedProducts();
 
   return (
     <Layout>
@@ -56,8 +56,8 @@ const Index = () => {
       <section className="py-20 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center">
+            <div className="text-center p-8 opacity-0 animate-fade-up stagger-1">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center hover-glow transition-all duration-300">
                 <Sparkles className="text-gold" size={28} />
               </div>
               <h3 className="font-serif text-2xl mb-3">Эксклюзивность</h3>
@@ -66,8 +66,8 @@ const Index = () => {
                 ведущими парфюмерами мира.
               </p>
             </div>
-            <div className="text-center p-8 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center">
+            <div className="text-center p-8 opacity-0 animate-fade-up stagger-2">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center hover-glow transition-all duration-300">
                 <Heart className="text-gold" size={28} />
               </div>
               <h3 className="font-serif text-2xl mb-3">Натуральность</h3>
@@ -76,8 +76,8 @@ const Index = () => {
                 регионов мира.
               </p>
             </div>
-            <div className="text-center p-8 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center">
+            <div className="text-center p-8 opacity-0 animate-fade-up stagger-3">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center hover-glow transition-all duration-300">
                 <Award className="text-gold" size={28} />
               </div>
               <h3 className="font-serif text-2xl mb-3">Мастерство</h3>
@@ -93,7 +93,7 @@ const Index = () => {
       {/* Featured Products */}
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 opacity-0 animate-fade-up">
             <p className="text-gold uppercase tracking-[0.3em] text-sm mb-4">
               Избранное
             </p>
@@ -107,9 +107,27 @@ const Index = () => {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
-            ))}
+            {loading ? (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                Загрузка...
+              </div>
+            ) : featuredProducts.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                Популярные ароматы пока не выбраны
+              </div>
+            ) : (
+              featuredProducts.map((item) => (
+                <ProductCard 
+                  key={item.product.id} 
+                  id={item.product.id}
+                  name={item.product.name}
+                  category={item.product.category}
+                  price={item.product.volumes[item.product.volumes.length - 1]?.price || item.product.base_price}
+                  image={item.product.image_url}
+                  notes={item.product.short_description}
+                />
+              ))
+            )}
           </div>
 
           <div className="text-center mt-12">
